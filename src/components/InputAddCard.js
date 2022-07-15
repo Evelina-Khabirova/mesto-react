@@ -4,8 +4,8 @@ function InputAddCard() {
       <div>
         <input 
           required
-          minlength="2"
-          maxlength="30"
+          minLength="2"
+          maxLength="30"
           name="name" 
           type="text" 
           id="card-name-input"

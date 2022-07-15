@@ -70,6 +70,7 @@ function Main({
               userKey={userId}
               onCardClick={onCardClick}
               onTrashClick={onTrashClick}
+              key={card._id}
             />
           );
         })}

@@ -4,8 +4,8 @@ function InputProfile() {
       <div>
         <input 
           required
-          minlength="2"
-          maxlength="40"
+          minLength="2"
+          maxLength="40"
           name="fullname" 
           type="text" 
           id="name-input"
@@ -17,8 +17,8 @@ function InputProfile() {
       <div>
         <input 
           required
-          minlength="2"
-          maxlength="200"
+          minLength="2"
+          maxLength="200"
           name="about_me" 
           type="text" 
           id="about-me-input"

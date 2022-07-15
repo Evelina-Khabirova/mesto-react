@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from './Header.js';
 import Main from './Main.js';
 import Footer from './Footer.js';
@@ -16,41 +16,50 @@ function App() {
   const [selectedCard, setSelectedCard] = React.useState(null);
   const [isSelectedCard, setIsSelectedCard] = React.useState(false);
   const [isDeleteCard, setIsDeleteCard] = React.useState(false);
+  const isOpen = isEditAvatarPopupOpen || isEditProfilePopupOpen || isAddPlacePopupOpen || isSelectedCard;
 
   function handleEscUp(evt) {
     if(evt.key === 'Escape') {
-      closeAllPopup();
+      closeAllPopups();
     }
   }
 
+  useEffect(() => {
+    function closeByEscape(evt) {
+      if(evt.key === 'Escape') {
+        closeAllPopups();
+      }
+    }
+    if(isOpen) {
+      document.addEventListener('keyup', handleEscUp);
+      return() => {
+        document.removeEventListener('keyup', handleEscUp);
+      }
+    }
+  }, [isOpen]);
+
   function handleEditAvatarClick() {
-    document.addEventListener('keyup', handleEscUp);
     setIsEditAvatarPopupOpen(true);
   }
 
   function handleEditProfileClick() {
-    document.addEventListener('keyup', handleEscUp);
     setIsEditProfilePopupOpen(true);
   }
 
   function handleAddPlaceClick() {
-    document.addEventListener('keyup', handleEscUp);
     setIsAddPlacePopupOpen(true);
   }
 
   function handleCardClick(card) {
-    document.addEventListener('keyup', handleEscUp);
     setIsSelectedCard(true);
     setSelectedCard(card);
   }
 
   function handleTrashClick() {
-    document.addEventListener('keyup', handleEscUp);
     setIsDeleteCard(true);
   }
 
-  function closeAllPopup() {
-    document.removeEventListener('keyup', handleEscUp);
+  function closeAllPopups() {
     setIsEditAvatarPopupOpen(false);
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
@@ -71,7 +80,7 @@ function App() {
       />
       <PopupWithForm 
         open={`${isEditAvatarPopupOpen ? 'popup__active' : ''}`}
-        close={closeAllPopup}
+        close={closeAllPopups}
         title="Обновить аватар"
         name="avatar"
         button="Сохранить"
@@ -80,7 +89,7 @@ function App() {
       </PopupWithForm>
       <PopupWithForm 
         open={`${isEditProfilePopupOpen ? 'popup__active' : ''}`}
-        close={closeAllPopup}
+        close={closeAllPopups}
         title="Редактировать профиль"
         name="profile"
         button="Сохранить"
@@ -89,7 +98,7 @@ function App() {
       </PopupWithForm>
       <PopupWithForm 
         open={`${isAddPlacePopupOpen ? 'popup__active' : ''}`}
-        close={closeAllPopup}
+        close={closeAllPopups}
         title="Новое место"
         name="card"
         button="Создать"
@@ -99,11 +108,11 @@ function App() {
       <ImagePopup 
         open={`${isSelectedCard ? 'popup__active' : ''}`}
         card={selectedCard}
-        close={closeAllPopup}
+        close={closeAllPopups}
       />
       <PopupWithForm 
         open={`${isDeleteCard ? 'popup__active' : ''}`}
-        close={closeAllPopup}
+        close={closeAllPopups}
         title="Вы уверены?"
         name="deleteCard"
         button="Да"
