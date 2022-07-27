@@ -3,13 +3,18 @@ import Header from './Header.js';
 import Main from './Main.js';
 import Footer from './Footer.js';
 import PopupWithForm from './PopupWithForm.js';
-import InputAvatar from './InputAvatar.js';
-import InputProfile from './InputProfile.js';
-import InputAddCard from './InputAddCard.js';
 import ImagePopup from './ImagePopup.js';
+import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
+import Api from '../utils/Api.js';
+import EditProfilePopup from './EditProfilePopup.js';
+import EditAvatarPopup from './EditAvatarPopup.js';
+import AddPlacePopup from './AddPlacePopup.js';
 
 function App() {
 
+  const api = new Api('https://mesto.nomoreparties.co/v1/cohort-43');
+  const [currentUser, setCurrentUser] = React.useState({name: '', about: ''});
+  const [cards, setCards] = React.useState([]);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = React.useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
@@ -17,6 +22,22 @@ function App() {
   const [isSelectedCard, setIsSelectedCard] = React.useState(false);
   const [isDeleteCard, setIsDeleteCard] = React.useState(false);
   const isOpen = isEditAvatarPopupOpen || isEditProfilePopupOpen || isAddPlacePopupOpen || isSelectedCard;
+
+  React.useEffect(() => {
+      api.identificationProfile()
+      .then((res) => {
+        setCurrentUser(res);
+      })
+      .catch((err) => console.log(err))
+}, []);
+
+  React.useEffect(() => {
+    api.getInitialCards()
+    .then((res) => {
+      setCards(res);
+    })
+    .catch((err) => console.log(err));
+  });
 
   function handleEscUp(evt) {
     if(evt.key === 'Escape') {
@@ -59,6 +80,49 @@ function App() {
     setIsDeleteCard(true);
   }
 
+  function handleCardLike(card) {
+    const isLiked = card.likes.some(i => i._id === currentUser._id);
+    
+    api.changeLikeCardStatus(card._id, isLiked)
+    .then((newCard) => {
+      setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
+    });
+  }
+
+  function handleCardDelete(card) {
+    api.deleteCard(card._id)
+    .then(() => {
+      setCards((state) => state.filter((c) => c._id !== card._id));
+    });
+  }
+
+  function handleUpdateUser({name, about}) {
+      api.editProfile(name, about)
+      .then((res) => {
+        setCurrentUser(res);
+        closeAllPopups();
+      })
+      .catch((err) => console.log(err))
+  }  
+
+  function handleUpdateAvatar({avatar}) {
+    api.editAvatar(avatar)
+    .then((res) => {
+      setCurrentUser(res);
+      closeAllPopups();
+    })
+    .catch((err) => console.log(err))
+  }
+
+  function handleAddPlaceSubmit({name, link}) {
+    api.addCard(name, link)
+    .then((newCard) => {
+      setCards([newCard, ...cards]);
+      closeAllPopups();
+    })
+    .catch((err) => console.log(err))
+  }
+
   function closeAllPopups() {
     setIsEditAvatarPopupOpen(false);
     setIsEditProfilePopupOpen(false);
@@ -69,57 +133,49 @@ function App() {
   }
 
   return (
-    <div>
-      <Header />
-      <Main 
-        openEditAvatar = {handleEditAvatarClick}
-        openEditProfile = {handleEditProfileClick}
-        openAddCard = {handleAddPlaceClick}
-        onCardClick = {handleCardClick}
-        onTrashClick = {handleTrashClick}
-      />
-      <PopupWithForm 
-        open={`${isEditAvatarPopupOpen ? 'popup__active' : ''}`}
-        close={closeAllPopups}
-        title="Обновить аватар"
-        name="avatar"
-        button="Сохранить"
-      >
-        <InputAvatar />
-      </PopupWithForm>
-      <PopupWithForm 
-        open={`${isEditProfilePopupOpen ? 'popup__active' : ''}`}
-        close={closeAllPopups}
-        title="Редактировать профиль"
-        name="profile"
-        button="Сохранить"
-      >
-        <InputProfile />
-      </PopupWithForm>
-      <PopupWithForm 
-        open={`${isAddPlacePopupOpen ? 'popup__active' : ''}`}
-        close={closeAllPopups}
-        title="Новое место"
-        name="card"
-        button="Создать"
-      >
-        <InputAddCard />
-      </PopupWithForm>
-      <ImagePopup 
-        open={`${isSelectedCard ? 'popup__active' : ''}`}
-        card={selectedCard}
-        close={closeAllPopups}
-      />
-      <PopupWithForm 
-        open={`${isDeleteCard ? 'popup__active' : ''}`}
-        close={closeAllPopups}
-        title="Вы уверены?"
-        name="deleteCard"
-        button="Да"
-      >
-      </PopupWithForm>
-      <Footer />
-    </div>
+    <CurrentUserContext.Provider value={currentUser}>
+      <div>
+        <Header />
+        <Main 
+          openEditAvatar = {handleEditAvatarClick}
+          openEditProfile = {handleEditProfileClick}
+          openAddCard = {handleAddPlaceClick}
+          onCardClick = {handleCardClick}
+          onCardLike = {handleCardLike}
+          onCardDelete = {handleCardDelete}
+          cards={cards}
+        />
+        <EditAvatarPopup 
+          isOpen={isEditAvatarPopupOpen}
+          onClose={closeAllPopups}
+          onUpdateAvatar={handleUpdateAvatar}
+        />
+        <EditProfilePopup 
+          isOpen={isEditProfilePopupOpen} 
+          onClose={closeAllPopups} 
+          onUpdateUser={handleUpdateUser}
+        />
+        <AddPlacePopup
+          isOpen={isAddPlacePopupOpen}
+          onClose={closeAllPopups}
+          onAddPlace={handleAddPlaceSubmit}
+        />
+        <ImagePopup 
+          open={`${isSelectedCard ? 'popup__active' : ''}`}
+          card={selectedCard}
+          close={closeAllPopups}
+        />
+        <PopupWithForm 
+          open={`${isDeleteCard ? 'popup__active' : ''}`}
+          close={closeAllPopups}
+          title="Вы уверены?"
+          name="deleteCard"
+          button="Да"
+        >
+        </PopupWithForm>
+        <Footer />
+      </div>
+    </CurrentUserContext.Provider>
   );
 }
 

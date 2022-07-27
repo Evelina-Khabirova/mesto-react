@@ -1,38 +1,17 @@
 import React from 'react';
-import Api from '../utils/Api.js';
 import Card from './Card.js';
+import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
 
 function Main({
   openEditAvatar,
   openEditProfile,
   openAddCard,
   onCardClick,
-  onTrashClick
+  onCardLike,
+  onCardDelete,
+  cards
 }) {
-
-  const [userAvatar, setUserAvatar] = React.useState('');
-  const [userProfile, setUserProfile] = React.useState('');
-  const [userDescription, setUserDescription] = React.useState('');
-  const [userId, setUserId] = React.useState('');
-  const [cards, setCards] = React.useState([]);
-
-  React.useEffect(() => {
-    const api = new Api('https://mesto.nomoreparties.co/v1/cohort-43');
-    api.identificationProfile()
-    .then((res) => {
-      setUserAvatar(res.avatar);
-      setUserProfile(res.name);
-      setUserDescription(res.about);
-      setUserId(res._id);
-    })
-    .catch((err) => console.log(err))
-
-    api.getInitialCards()
-    .then((res) => {
-      setCards(res);
-    })
-    .catch((err) => console.log(err));
-  }, []);
+  const currentUser = React.useContext(CurrentUserContext);
 
   return(
     <main>
@@ -41,18 +20,18 @@ function Main({
         <div 
           className="profile__avatar"
           onClick={openEditAvatar}
-          style={ {backgroundImage: `url(${userAvatar})`} }
+          style={ {backgroundImage: `url(${currentUser.avatar})`} }
         ></div>
       </div>
       <div className="profile__profile-info">
         <h1 
-          className="profile__fullname">{userProfile}</h1>
+          className="profile__fullname">{currentUser.name}</h1>
         <button 
           type="button" 
           className="profile__edit-button"
           onClick={openEditProfile}
         ></button> 
-        <p className="profile__about-me">{userDescription}</p>
+        <p className="profile__about-me">{currentUser.about}</p>
       </div>
       <button 
         type="button" 
@@ -66,10 +45,9 @@ function Main({
           return(
             <Card
               card={card}
-              cardKey={card.owner._id}
-              userKey={userId}
               onCardClick={onCardClick}
-              onTrashClick={onTrashClick}
+              onCardLike={onCardLike}
+              onCardDelete={onCardDelete}
               key={card._id}
             />
           );
