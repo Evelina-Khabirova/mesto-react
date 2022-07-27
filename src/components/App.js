@@ -4,11 +4,12 @@ import Main from './Main.js';
 import Footer from './Footer.js';
 import PopupWithForm from './PopupWithForm.js';
 import ImagePopup from './ImagePopup.js';
-import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
 import Api from '../utils/Api.js';
 import EditProfilePopup from './EditProfilePopup.js';
 import EditAvatarPopup from './EditAvatarPopup.js';
 import AddPlacePopup from './AddPlacePopup.js';
+import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
+import FormValidator from './FormValidator.js';
 
 function App() {
 
@@ -86,14 +87,16 @@ function App() {
     api.changeLikeCardStatus(card._id, isLiked)
     .then((newCard) => {
       setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
-    });
+    })
+    .catch((err) => console.log(err));
   }
 
   function handleCardDelete(card) {
     api.deleteCard(card._id)
     .then(() => {
       setCards((state) => state.filter((c) => c._id !== card._id));
-    });
+    })
+    .catch((err) => console.log(err));
   }
 
   function handleUpdateUser({name, about}) {
@@ -131,6 +134,29 @@ function App() {
     setSelectedCard(null);
     setIsDeleteCard(false);
   }
+
+
+  const config = {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'popup__error_visible'
+  }
+  
+  const formValidators = {};
+  
+  const enableValidation = (config) => {
+    const formList = Array.from(document.querySelectorAll(config.formSelector));
+    formList.forEach((formElement) => {
+      const validator = new FormValidator(formElement, config);
+      const formName = formElement.getAttribute('name');
+      formValidators[formName] = validator;
+      validator.enableValidation();
+    });
+  }
+  enableValidation(config);
 
   return (
     <CurrentUserContext.Provider value={currentUser}>

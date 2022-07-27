@@ -1,5 +1,4 @@
-import React from 'react';
-import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
+import React, { useEffect, useState } from 'react';
 import PopupWithForm from './PopupWithForm.js';
 
 function AddPlacePopup({
@@ -7,32 +6,30 @@ function AddPlacePopup({
   onClose,
   onAddPlace
 }){
-
-  const [name, setName] = React.useState('');
-  const [link, setLink] = React.useState('');
+  const [values, setValues] = useState({name: '', link: ''});
 
   React.useEffect(() => {
     if(!isOpen) {
-      setName();
-      setLink();
+      setValues({
+        name: '',
+        link: ''
+      })
     }
-  }, [isOpen, setName, setLink])
+  }, [isOpen])
 
-  function handleChangeName(e) {
-    e.preventDefault();
-    setName(e.target.value);
-  }
-
-  function handleChangeLink(e) {
-    e.preventDefault();
-    setLink(e.target.value);
+  function handleChange(e) {
+    const target = e.target;
+    setValues((prev) => ({
+      ...prev,
+      [target.name]: target.value
+    }));
   }
 
   function handleSubmit(e) {
     e.preventDefault();
     onAddPlace({
-      name: name,
-      link: link,
+      name: values.name,
+      link: values.link,
     });
   }
 
@@ -55,8 +52,8 @@ function AddPlacePopup({
           id="card-name-input"
           placeholder="Название" 
           className="popup__input popup__input_type_card-name"
-          value={name || ''}
-          onChange={handleChangeName}
+          value={values.name || ''}
+          onChange={handleChange}
         />
         <span className="popup__error" id="card-name-input-error">Нет текста</span>
       </div>
@@ -68,8 +65,8 @@ function AddPlacePopup({
           id="card-link-input"
           placeholder="Ссылка на картинку" 
           className="popup__input popup__input_type_card-link"
-          value={link || ''}
-          onChange={handleChangeLink}
+          value={values.link || ''}
+          onChange={handleChange}
         />
         <span className="popup__error" id="card-link-input-error"></span>
       </div>
