@@ -57,7 +57,7 @@ function EditProfilePopup({
           id="name-input"
           placeholder="ФИО" 
           className="popup__input popup__input_type_fullname"
-          value={values.fullname}
+          value={values.fullname || ''}
           onChange={handleChange}
         />
         <span className="popup__error" id="name-input-error">Нет текста</span>
@@ -72,7 +72,7 @@ function EditProfilePopup({
           id="about-me-input"
           placeholder="О себе" 
           className="popup__input popup__input_type_about-me"
-          value={values.about_me}
+          value={values.about_me || ''}
           onChange={handleChange}
         />
         <span className="popup__error" id="about-me-input-error">Нет текста</span>

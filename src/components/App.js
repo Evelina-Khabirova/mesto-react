@@ -9,7 +9,6 @@ import EditProfilePopup from './EditProfilePopup.js';
 import EditAvatarPopup from './EditAvatarPopup.js';
 import AddPlacePopup from './AddPlacePopup.js';
 import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
-import FormValidator from './FormValidator.js';
 
 function App() {
 
@@ -38,7 +37,7 @@ function App() {
       setCards(res);
     })
     .catch((err) => console.log(err));
-  });
+  }, []);
 
   function handleEscUp(evt) {
     if(evt.key === 'Escape') {
@@ -134,29 +133,6 @@ function App() {
     setSelectedCard(null);
     setIsDeleteCard(false);
   }
-
-
-  const config = {
-    formSelector: '.popup__form',
-    inputSelector: '.popup__input',
-    submitButtonSelector: '.popup__button',
-    inactiveButtonClass: 'popup__button_disabled',
-    inputErrorClass: 'popup__input_type_error',
-    errorClass: 'popup__error_visible'
-  }
-  
-  const formValidators = {};
-  
-  const enableValidation = (config) => {
-    const formList = Array.from(document.querySelectorAll(config.formSelector));
-    formList.forEach((formElement) => {
-      const validator = new FormValidator(formElement, config);
-      const formName = formElement.getAttribute('name');
-      formValidators[formName] = validator;
-      validator.enableValidation();
-    });
-  }
-  enableValidation(config);
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
